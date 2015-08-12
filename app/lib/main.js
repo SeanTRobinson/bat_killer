@@ -1,6 +1,6 @@
 console.log("Started");
 
-var game = new Phaser.Game(800, 600, Phaser.AUTO, '', { preload: preload, create: create, update: update });
+var game = new Phaser.Game('100%', '100%', Phaser.CANVAS, 'parent', { preload: preload, create: create, update: update });
 var score = 0;
 var scoreText;
 var maxTimer = 3000;
@@ -9,10 +9,12 @@ var enemyXPos = game.world.width/2;
 var enemyYPos = game.world.height/2;
 var enemy;
 var crosshair;
+var enemyVelocity = 200;
 
 function preload() {
-  game.load.image('background', 'assets/background.png');
-  game.load.image('crosshair', 'assets/crosshair.png');
+  game.scale.scaleMode = Phaser.ScaleManager.RESIZE;
+  game.load.image('background', 'assets/landscape.jpg');
+  game.load.image('crosshair', 'assets/swatter.png');
   game.load.audio('shot', 'assets/shot.mp3');
   game.load.audio('gameOver', 'assets/gameOver.mp3');
   game.load.audio('deathSound', 'assets/die.mp3');
@@ -27,8 +29,8 @@ function create() {
   game.physics.startSystem(Phaser.Physics.ARCADE);
   game.add.sprite(0, 0, 'background');
 
-  scoreText = game.add.text(16, 16, 'Score: 0', {fontSize: '32px', fill: '#000'});
-  currentTimer = game.add.text(16, 64, maxTimer, {fontSize: '16px', fille: '#000'});
+  scoreText = game.add.text(16, 16, 'Score: 0', {fontSize: '32px', fill: '#FFF'});
+  currentTimer = game.add.text(16, 64, maxTimer, {fontSize: '16px', fill: '#FFF'});
 
   backgroundMusic = game.add.audio('backgroundMusic');
   backgroundMusic.play();
@@ -45,7 +47,8 @@ function createEnemy() {
   game.physics.enable(enemy, Phaser.Physics.ARCADE);
   enemy.animations.add('flap', [0, 1, 2, 3, 4], 10, true);
   enemy.animations.play('flap');
-  enemy.body.velocity.setTo(200,200);
+  enemy.body.velocity.x = 200;
+  enemy.body.velocity.y = 200;
   enemy.body.collideWorldBounds = true;
   enemy.body.bounce.set(1);
 }
@@ -60,14 +63,14 @@ function update() {
 
 function handleMouseDown(event)
 {
-  crosshair = game.add.sprite(game.input.mousePointer.x-45, game.input.mousePointer.y-45, 'crosshair');
-  game.add.tween(crosshair).to( { alpha: 0 }, 2000, "Linear", true);
+  crosshair = game.add.sprite(game.input.mousePointer.x-210, game.input.mousePointer.y-80, 'crosshair');
+  game.add.tween(crosshair).to( { alpha: 0 }, 500, "Linear", true);
 
   shotSound = game.add.audio('shot');
   shotSound.play();
 
-  newVelocity = enemy.body.velocity.x * 1.05;
-  enemy.velocity.setTo(newVelocity, newVelocity);
+  //newVelocity = enemy.body.velocity.x * 1.05;
+  //enemy.velocity.setTo(newVelocity, newVelocity);
 
   shotDistX = Math.abs((game.input.mousePointer.x-45) - enemy.x);
   shotDistY = Math.abs((game.input.mousePointer.y-45) - enemy.y);
@@ -80,8 +83,8 @@ function handleMouseDown(event)
 
 function killEnemy() {
   score += 100;
-  deathSound = game.add.audio('death');
-  shotSound.play();
+  deathSound = game.add.audio('deathSound');
+  deathSound.play();
 }
 
     // 	stage.removeChild(animation);
