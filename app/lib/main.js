@@ -34,7 +34,7 @@ function create() {
   backgroundMusic.play();
 
   createEnemy();
-  
+
   window.onmousedown = handleMouseDown;
 }
 
@@ -60,31 +60,30 @@ function update() {
 
 function handleMouseDown(event)
 {
-  crosshair = game.add.sprite(event.clientX-45, event.clientY-45);
-  game.add.tween(crosshair).to( { alpha: 0 }, 2000, Phaser.Easing.Linear.None, true, 0, 1000, true);
+  crosshair = game.add.sprite(game.input.mousePointer.x-45, game.input.mousePointer.y-45, 'crosshair');
+  game.add.tween(crosshair).to( { alpha: 0 }, 2000, "Linear", true);
 
   shotSound = game.add.audio('shot');
   shotSound.play();
 
+  newVelocity = enemy.body.velocity.x * 1.05;
+  enemy.velocity.setTo(newVelocity, newVelocity);
 
-    // //Increase speed of enemy slightly
-    // enemyXSpeed *= 1.05;
-    // enemyYSpeed *= 1.06;
-    //
-    // //Obtain Shot position
-    // var shotX = Math.round(event.clientX);
-    // var shotY = Math.round(event.clientY);
-    // var spriteX = Math.round(animation.x);
-    // var spriteY = Math.round(animation.y);
-    //
-    // // Compute the X and Y distance using absolte value
-    // var distX = Math.abs(shotX - spriteX);
-    // var distY = Math.abs(shotY - spriteY);
-    //
-    // // Anywhere in the body or head is a hit - but not the wings
-    // if(distX < 30 && distY < 59 )
-    // {
-    // 	//Hit
+  shotDistX = Math.abs((game.input.mousePointer.x-45) - enemy.x);
+  shotDistY = Math.abs((game.input.mousePointer.y-45) - enemy.y);
+
+  if(shotDistX < 30 && shotDistY < 59) {
+    killEnemy();
+  }
+
+}
+
+function killEnemy() {
+  score += 100;
+  deathSound = game.add.audio('death');
+  shotSound.play();
+}
+
     // 	stage.removeChild(animation);
     // 	batDeath();
     // 	score += 100;
@@ -117,4 +116,3 @@ function handleMouseDown(event)
     // 	scoreText.text = "Score: " + score.toString();
     //
     // }
-}
