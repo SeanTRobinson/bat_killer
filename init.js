@@ -16,8 +16,13 @@ var enemyYSpeed = 1.75;
 var score = 0;
 var scoreText;
 var gameTimer;
-var gameTime = 0;
+var gameTime = 3000;
+var maxGameTime = 3000;
+var timerReduction = 10;
 var timerText;
+var enemyScale = 1.0;
+var enemyScaleReduction = 0.05;
+var enemyMinScale = 0.1;
 
 window.onload = function()
 {
@@ -26,6 +31,8 @@ window.onload = function()
      *
      */
     var canvas = document.getElementById('myCanvas');
+    canvas.touchstart = handleMouseDown;
+    canvas.addEventListener("touchstart", this.handleMouseDown);
     context = canvas.getContext('2d');
     context.canvas.width = WIDTH;
     context.canvas.height = HEIGHT;
@@ -61,7 +68,7 @@ window.onload = function()
      *      Create a timer that updates once per second
      *
      */
-    gameTimer = setInterval(updateTime, 1000);
+    gameTimer = setInterval(updateTime, 1);
 
 }
 
@@ -72,7 +79,7 @@ function queueLoaded(event)
     stage.addChild(backgroundImage);
 
     //Add Score
-    scoreText = new createjs.Text("1UP: " + score.toString(), "36px Arial", "#FFF");
+    scoreText = new createjs.Text("Score: " + score.toString(), "36px Arial", "#FFF");
     scoreText.x = 10;
     scoreText.y = 10;
     stage.addChild(scoreText);
@@ -126,8 +133,11 @@ function createEnemy()
 	animation = new createjs.Sprite(spriteSheet, "flap");
     animation.regX = 99;
     animation.regY = 58;
+    enemyXPos = getRandomInt(100, WIDTH-100);
+    enemyYPos = getRandomInt(100, HEIGHT-100);
     animation.x = enemyXPos;
     animation.y = enemyYPos;
+    animation.scale = enemyScale;
     animation.gotoAndPlay("flap");
     stage.addChildAt(animation,1);
 }
@@ -143,18 +153,22 @@ function batDeath()
   stage.addChild(deathAnimation);
 }
 
+function getRandomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
 function tickEvent()
 {
 	//Make sure enemy bat is within game boundaries and move enemy Bat
-	if(enemyXPos < WIDTH && enemyXPos > 0)
+	if(enemyXPos < WIDTH-100 && enemyXPos > 100)
 	{
 		enemyXPos += enemyXSpeed;
-	} else 
+	} else
 	{
 		enemyXSpeed = enemyXSpeed * (-1);
 		enemyXPos += enemyXSpeed;
 	}
-	if(enemyYPos < HEIGHT && enemyYPos > 0)
+	if(enemyYPos < HEIGHT-100 && enemyYPos > 100)
 	{
 		enemyYPos += enemyYSpeed;
 	} else
@@ -166,28 +180,19 @@ function tickEvent()
 	animation.x = enemyXPos;
 	animation.y = enemyYPos;
 
-	
-}
 
-/*
-function handleMouseMove(event)
-{
-    //Offset the position by 45 pixels so mouse is in center of crosshair
-    crossHair.x = event.clientX-45;
-    crossHair.y = event.clientY-45;
 }
-*/
 
 function handleMouseDown(event)
 {
-    
+
     //Display CrossHair
     crossHair = new createjs.Bitmap(queue.getResult("crossHair"));
     crossHair.x = event.clientX-45;
     crossHair.y = event.clientY-45;
     stage.addChild(crossHair);
     createjs.Tween.get(crossHair).to({alpha: 0},1000);
-    
+
     //Play Gunshot sound
     createjs.Sound.play("shot");
 
@@ -212,30 +217,41 @@ function handleMouseDown(event)
     	stage.removeChild(animation);
     	batDeath();
     	score += 100;
-    	scoreText.text = "1UP: " + score.toString();
+    	scoreText.text = "Score: " + score.toString();
     	createjs.Sound.play("deathSound");
-    	
+
         //Make it harder next time
     	enemyYSpeed *= 1.25;
     	enemyXSpeed *= 1.3;
 
+      if (maxGameTime > 500) {
+        maxGameTime -= timerReduction;
+      }
+
+      if (enemyScale > enemyMinScale) {
+        enemyScale = enemyScale - enemyScaleReduction;
+      }
+
+      gameTime = maxGameTime;
+
     	//Create new enemy
-    	var timeToCreate = Math.floor((Math.random()*3500)+1);
-	    setTimeout(createEnemy,timeToCreate);
+    	//var timeToCreate = Math.floor((Math.random()*3500)+1);
+	    //setTimeout(createEnemy,timeToCreate);
+      createEnemy();
 
     } else
     {
     	//Miss
     	score -= 10;
-    	scoreText.text = "1UP: " + score.toString();
+    	scoreText.text = "Score: " + score.toString();
 
     }
 }
 
 function updateTime()
 {
-	gameTime += 1;
-	if(gameTime > 60)
+	gameTime -= 1;
+	if(gameTime <= 0)
 	{
 		//End Game and Clean up
 		timerText.text = "GAME OVER";
@@ -248,6 +264,5 @@ function updateTime()
 	else
 	{
 		timerText.text = "Time: " + gameTime
-    createjs.Sound.play("tick");
 	}
 }
