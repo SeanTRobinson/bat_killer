@@ -1,7 +1,7 @@
 console.log("Started");
 
 var game = new Phaser.Game('100%', '100%', Phaser.CANVAS, 'parent', { preload: preload, create: create, update: update });
-var score = 0;
+var score;
 var scoreText;
 var maxTimer = 3000;
 var currentTimer;
@@ -9,7 +9,8 @@ var enemyXPos = game.world.width/2;
 var enemyYPos = game.world.height/2;
 var enemy;
 var crosshair;
-var enemyVelocity = 200;
+var enemyVelocity;
+var deathSound;
 
 function preload() {
   game.scale.scaleMode = Phaser.ScaleManager.RESIZE;
@@ -35,7 +36,12 @@ function create() {
   backgroundMusic = game.add.audio('backgroundMusic');
   backgroundMusic.play();
 
+  enemyVelocity = 200;
+  score = 0;
+
   createEnemy();
+
+  deathSound = game.add.audio('deathSound');
 
   window.onmousedown = handleMouseDown;
 }
@@ -69,8 +75,9 @@ function handleMouseDown(event)
   shotSound = game.add.audio('shot');
   shotSound.play();
 
-  //newVelocity = enemy.body.velocity.x * 1.05;
-  //enemy.velocity.setTo(newVelocity, newVelocity);
+  enemyVelocity *= 1.05;
+  enemy.body.velocity.x = enemyVelocity;
+  enemy.body.velocity.y = enemyVelocity;
 
   shotDistX = Math.abs((game.input.mousePointer.x-45) - enemy.x);
   shotDistY = Math.abs((game.input.mousePointer.y-45) - enemy.y);
@@ -83,8 +90,11 @@ function handleMouseDown(event)
 
 function killEnemy() {
   score += 100;
-  deathSound = game.add.audio('deathSound');
+  scoreText = "Score: " + score;
   deathSound.play();
+  enemyVelocity *= 1.3;
+  enemy.kill();
+  createEnemy();
 }
 
     // 	stage.removeChild(animation);
