@@ -1,0 +1,12 @@
+{
+  "name": "Project",
+  "version": "0.0.1",
+  "authors": [
+    "Sean Robinson <sean@seantrobinson.co.uk"
+  ],
+  "description": "Project",
+  "main": "index.html",
+  "dependencies": {
+    "phaser": "*"
+  }
+}
